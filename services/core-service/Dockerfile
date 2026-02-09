@@ -5,11 +5,11 @@ WORKDIR /app
 # Copy source code vào
 COPY . .
 
-# Cấp quyền thực thi cho file mvnw (quan trọng nếu code trên Windows)
-RUN chmod +x mvnw
+# Cài đặt Maven (vì mvnw đang lỗi trên environment này)
+RUN apk add --no-cache maven
 
 # Chạy lệnh build (bỏ qua test để build nhanh hơn cho MVP)
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
 # --- Stage 2: Run (Chỉ dùng JRE để chạy cho nhẹ) ---
 FROM eclipse-temurin:21-jre-alpine
