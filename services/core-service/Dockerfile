@@ -5,11 +5,11 @@ WORKDIR /app
 # Copy source code vào
 COPY . .
 
-# Cấp quyền thực thi và chuyển đổi định dạng dòng (CRLF -> LF)
-RUN apk add --no-cache dos2unix && dos2unix mvnw .mvn/wrapper/maven-wrapper.properties && chmod +x mvnw
+# Cài đặt Maven (vì mvnw đang lỗi trên environment này)
+RUN apk add --no-cache maven
 
 # Chạy lệnh build (bỏ qua test để build nhanh hơn cho MVP)
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
 # --- Stage 2: Run (Chỉ dùng JRE để chạy cho nhẹ) ---
 FROM eclipse-temurin:21-jre-alpine
