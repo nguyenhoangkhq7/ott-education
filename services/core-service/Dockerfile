@@ -1,30 +1,25 @@
-# --- Stage 1: Build ---
+# --- Stage 1: Build (Dùng JDK để build code) ---
 FROM eclipse-temurin:21-jdk-alpine AS build
 WORKDIR /app
 
-# 1. Chỉ copy các file cấu hình Maven trước (để tận dụng Cache của Docker)
-COPY .mvn/ .mvn
-COPY mvnw pom.xml ./
+# Copy source code vào
+COPY . .
 
-# 2. Cấp quyền thực thi (quan trọng)
-RUN chmod +x mvnw
+# Cấp quyền thực thi và chuyển đổi định dạng dòng (CRLF -> LF)
+RUN apk add --no-cache dos2unix && dos2unix mvnw && chmod +x mvnw
 
-# 3. Tải toàn bộ thư viện về trước (Dependency Resolution)
-# Bước này giúp các lần build sau cực nhanh nếu bạn chỉ sửa code mà không sửa pom.xml
-RUN ./mvnw dependency:go-offline
-
-# 4. Giờ mới copy source code vào
-COPY src ./src
-
-# 5. Build code
+# Chạy lệnh build (bỏ qua test để build nhanh hơn cho MVP)
 RUN ./mvnw clean package -DskipTests
 
-# --- Stage 2: Run ---
+# --- Stage 2: Run (Chỉ dùng JRE để chạy cho nhẹ) ---
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-# Copy file .jar từ Stage 1
+# Copy file .jar từ Stage 1 sang Stage 2
 COPY --from=build /app/target/*.jar app.jar
 
+# Cổng mặc định
 EXPOSE 8080
+
+# Lệnh chạy app
 ENTRYPOINT ["java", "-jar", "app.jar"]
