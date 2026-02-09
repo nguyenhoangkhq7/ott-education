@@ -6,7 +6,7 @@ WORKDIR /app
 COPY . .
 
 # Cấp quyền thực thi và chuyển đổi định dạng dòng (CRLF -> LF)
-RUN apk add --no-cache dos2unix && dos2unix mvnw && chmod +x mvnw
+RUN apk add --no-cache dos2unix && dos2unix mvnw .mvn/wrapper/maven-wrapper.properties && chmod +x mvnw
 
 # Chạy lệnh build (bỏ qua test để build nhanh hơn cho MVP)
 RUN ./mvnw clean package -DskipTests
